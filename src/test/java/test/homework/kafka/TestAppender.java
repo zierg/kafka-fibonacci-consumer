@@ -5,8 +5,6 @@ import ch.qos.logback.core.AppenderBase;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,5 +19,5 @@ public final class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     @Getter
-    List<ILoggingEvent> events = new ArrayList<>();
+    static List<ILoggingEvent> events = new ArrayList<>();
 }

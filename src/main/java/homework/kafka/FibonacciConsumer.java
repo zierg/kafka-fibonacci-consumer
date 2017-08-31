@@ -1,7 +1,7 @@
 package homework.kafka;
 
 import lombok.AccessLevel;
-import lombok.Setter;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.val;
@@ -12,25 +12,36 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FibonacciConsumer {
 
     public FibonacciConsumer(String servers, int amount) {
+        this(servers, amount, () -> false);
+    }
+
+    public FibonacciConsumer(String servers, int amount, Supplier<Boolean> finishCondition) {
         this.props = initProps(servers);
         this.amount = amount;
+        this.finishCondition = finishCondition;
     }
 
     public void consume() {
         KafkaConsumer<String, Long> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(TOPIC));
+        processRecords(consumer);
+        consumer.unsubscribe();
+        consuming = false;
+        System.out.println("Finished");
+    }
+
+    private void processRecords(KafkaConsumer<String, Long> consumer) {
         int consumed = 0;
         long sum = 0;
-        working = true;
-        while (working) {
-            ConsumerRecords<String, Long> records = consumer.poll(100);
+        while (!finishCondition.get()) {
+            ConsumerRecords<String, Long> records = poll(consumer);
             for (val record : records) {
-                System.out.println("consumed");
                 Long value = record.value();
                 sum += value;
                 consumed++;
@@ -40,7 +51,12 @@ public class FibonacciConsumer {
                 }
             }
         }
-        System.out.println("Finished");
+    }
+
+    private ConsumerRecords<String, Long> poll(KafkaConsumer<String, Long> consumer) {
+        ConsumerRecords<String, Long> poll = consumer.poll(100);
+        consuming = true;
+        return poll;
     }
 
     private Properties initProps(String servers) {
@@ -54,12 +70,13 @@ public class FibonacciConsumer {
         return props;
     }
 
-    @Setter
-    @NonFinal
-    boolean working = false;
-
+    Supplier<Boolean> finishCondition;
     int amount;
     Properties props;
+
+    @NonFinal
+    @Getter
+    boolean consuming = false;
 
     static String TOPIC = "fibonacci";
 
