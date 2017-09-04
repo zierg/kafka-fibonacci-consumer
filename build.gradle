@@ -16,10 +16,15 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    testCompile.exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
 dependencies {
     compile "org.apache.kafka:kafka-clients:0.10.1.1"
 
     compile "org.slf4j:slf4j-api:1.7.25"
+    compile "org.slf4j:slf4j-simple:1.7.25"
 
     compileOnly 'org.projectlombok:lombok:1.16.18'
 

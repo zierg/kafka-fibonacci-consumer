@@ -14,7 +14,6 @@ public final class TestAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        System.out.println("HEY! " + eventObject);
         events.add(eventObject);
     }
 
